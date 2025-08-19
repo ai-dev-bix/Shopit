@@ -74,11 +74,12 @@ class Router {
             'admin' => 'admin_dashboard',
             'admin/users' => 'admin_users',
             'admin/listings' => 'admin_listings',
-            'admin/orders' => 'admin_orders',
-            'admin/system' => 'admin_system',
-            
-            // API routes
-            'api/auth' => 'api_auth',
+                                'admin/orders' => 'admin_orders',
+                    'admin/system' => 'admin_system',
+                    'logout' => 'logout',
+                    
+                    // API routes
+                    'api/auth' => 'api_auth',
             'api/users' => 'api_users',
             'api/listings' => 'api_listings',
             'api/search' => 'api_search',
@@ -247,17 +248,21 @@ class Router {
                 $this->showListingDetail();
                 break;
                 
-            case 'create_listing':
-                $this->showCreateListing();
-                break;
-                
-            case 'admin_dashboard':
-                $this->showAdminDashboard();
-                break;
-                
-            default:
-                $this->showError('Page Not Found', 'The requested page could not be found.', 404);
-                break;
+                                case 'create_listing':
+                        $this->showCreateListing();
+                        break;
+                        
+                    case 'logout':
+                        $this->showLogout();
+                        break;
+                        
+                    case 'admin_dashboard':
+                        $this->showAdminDashboard();
+                        break;
+                        
+                    default:
+                        $this->showError('Page Not Found', 'The requested page could not be found.', 404);
+                        break;
         }
     }
     
@@ -360,17 +365,29 @@ class Router {
         include __DIR__ . '/../src/templates/footer.php';
     }
     
-    /**
-     * Show admin dashboard
-     */
-    private function showAdminDashboard() {
-        $pageTitle = 'Admin Dashboard - ' . PLATFORM_NAME;
-        $pageDescription = 'System administration and monitoring';
-        
-        include __DIR__ . '/../src/templates/header.php';
-        include __DIR__ . '/../src/templates/admin/dashboard.php';
-        include __DIR__ . '/../src/templates/footer.php';
-    }
+                /**
+             * Show logout confirmation page
+             */
+            private function showLogout() {
+                $pageTitle = 'Logout - ' . PLATFORM_NAME;
+                $pageDescription = 'Sign out of your account';
+                
+                include __DIR__ . '/../src/templates/header.php';
+                include __DIR__ . '/../src/templates/logout.php';
+                include __DIR__ . '/../src/templates/footer.php';
+            }
+            
+            /**
+             * Show admin dashboard
+             */
+            private function showAdminDashboard() {
+                $pageTitle = 'Admin Dashboard - ' . PLATFORM_NAME;
+                $pageDescription = 'System administration and monitoring';
+                
+                include __DIR__ . '/../src/templates/header.php';
+                include __DIR__ . '/../src/templates/admin/dashboard.php';
+                include __DIR__ . '/../src/templates/footer.php';
+            }
     
     /**
      * Show error page

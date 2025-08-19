@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test Page - Location-Based Marketplace Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">API Test Page</h1>
+            <p class="subtitle">Testing API endpoints for the marketplace platform</p>
+            
+            <div class="columns">
+                <div class="column is-6">
+                    <div class="card">
+                        <header class="card-header">
+                            <p class="card-header-title">Test Username Availability</p>
+                        </header>
+                        <div class="card-content">
+                            <div class="field">
+                                <label class="label">Username</label>
+                                <div class="control">
+                                    <input class="input" type="text" id="testUsername" placeholder="Enter username to test">
+                                </div>
+                            </div>
+                            <button class="button is-info" onclick="testUsernameCheck()">Check Availability</button>
+                            <div id="usernameResult" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="column is-6">
+                    <div class="card">
+                        <header class="card-header">
+                            <p class="card-header-title">Test Registration</p>
+                        </header>
+                        <div class="card-content">
+                            <div class="field">
+                                <label class="label">Username</label>
+                                <div class="control">
+                                    <input class="input" type="text" id="regUsername" placeholder="Username">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Email</label>
+                                <div class="control">
+                                    <input class="input" type="email" id="regEmail" placeholder="Email">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Type</label>
+                                <div class="control">
+                                    <div class="select">
+                                        <select id="regType">
+                                            <option value="buyer">Buyer</option>
+                                            <option value="seller">Seller</option>
+                                            <option value="both">Both</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="button is-success" onclick="testRegistration()">Test Registration</button>
+                            <div id="regResult" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns mt-4">
+                <div class="column is-6">
+                    <div class="card">
+                        <header class="card-header">
+                            <p class="card-header-title">Test Login</p>
+                        </header>
+                        <div class="card-content">
+                            <div class="field">
+                                <label class="label">Username</label>
+                                <div class="control">
+                                    <input class="input" type="text" id="loginUsername" placeholder="Username">
+                                </div>
+                            </div>
+                            <button class="button is-warning" onclick="testLogin()">Test Login</button>
+                            <div id="loginResult" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="column is-6">
+                    <div class="card">
+                        <header class="card-header">
+                            <p class="card-header-title">Test Logout</p>
+                        </header>
+                        <div class="card-content">
+                            <button class="button is-danger" onclick="testLogout()">Test Logout</button>
+                            <div id="logoutResult" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="/" class="button is-light">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Test username availability check
+        async function testUsernameCheck() {
+            const username = document.getElementById('testUsername').value;
+            const resultDiv = document.getElementById('usernameResult');
+            
+            if (!username) {
+                resultDiv.innerHTML = '<div class="notification is-warning">Please enter a username</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/users/check-username?username=${encodeURIComponent(username)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const className = data.available ? 'is-success' : 'is-danger';
+                    resultDiv.innerHTML = `<div class="notification ${className}">${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="notification is-danger">${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="notification is-danger">Error: ' + error.message + '</div>';
+            }
+        }
+        
+        // Test user registration
+        async function testRegistration() {
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const type = document.getElementById('regType').value;
+            const resultDiv = document.getElementById('regResult');
+            
+            if (!username) {
+                resultDiv.innerHTML = '<div class="notification is-warning">Please enter a username</div>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('email', email);
+            formData.append('type', type);
+            formData.append('csrf_token', 'test-token'); // This will fail CSRF validation
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="notification is-success">${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="notification is-danger">${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="notification is-danger">Error: ' + error.message + '</div>';
+            }
+        }
+        
+        // Test user login
+        async function testLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            if (!username) {
+                resultDiv.innerHTML = '<div class="notification is-warning">Please enter a username</div>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('csrf_token', 'test-token'); // This will fail CSRF validation
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="notification is-success">${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="notification is-danger">${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="notification is-danger">Error: ' + error.message + '</div>';
+            }
+        }
+        
+        // Test logout
+        async function testLogout() {
+            const resultDiv = document.getElementById('logoutResult');
+            
+            const formData = new FormData();
+            formData.append('csrf_token', 'test-token'); // This will fail CSRF validation
+            
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="notification is-success">${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="notification is-danger">${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="notification is-danger">Error: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>
