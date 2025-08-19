@@ -1,0 +1,45 @@
+{
+  "platform": {
+    "name": "Location-Based Marketplace Platform",
+    "version": "1.0.0",
+    "description": "Prototype for location-based buying and selling",
+    "maintenance_mode": false
+  },
+  "features": {
+    "user_registration": true,
+    "listing_creation": true,
+    "search_and_filtering": true,
+    "purchase_flow": true,
+    "admin_panel": true,
+    "mobile_optimization": true
+  },
+  "limits": {
+    "max_images_per_listing": 5,
+    "max_file_size_mb": 5,
+    "max_listings_per_user": 50,
+    "max_tags_per_listing": 5,
+    "search_radius_km": 50
+  },
+  "security": {
+    "session_timeout_seconds": 3600,
+    "max_login_attempts": 5,
+    "password_required": false,
+    "csrf_protection": true,
+    "file_upload_validation": true
+  },
+  "performance": {
+    "enable_caching": false,
+    "image_compression": true,
+    "lazy_loading": true,
+    "minify_assets": false
+  },
+  "external_services": {
+    "google_maps_api_key": "",
+    "stripe_enabled": false,
+    "paypal_enabled": false
+  },
+  "metadata": {
+    "last_updated": "2024-01-01T00:00:00Z",
+    "created_by": "AI Assistant"
+  }
+}

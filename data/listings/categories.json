@@ -1,0 +1,88 @@
+{
+  "categories": [
+    {
+      "id": "electronics",
+      "name": "Electronics",
+      "type": "product",
+      "description": "Electronic devices and accessories",
+      "icon": "laptop",
+      "active": true
+    },
+    {
+      "id": "home",
+      "name": "Home & Garden",
+      "type": "product",
+      "description": "Home improvement and garden items",
+      "icon": "home",
+      "active": true
+    },
+    {
+      "id": "automotive",
+      "name": "Automotive",
+      "type": "product",
+      "description": "Cars, parts, and automotive services",
+      "icon": "car",
+      "active": true
+    },
+    {
+      "id": "fashion",
+      "name": "Fashion & Beauty",
+      "type": "product",
+      "description": "Clothing, accessories, and beauty products",
+      "icon": "tshirt",
+      "active": true
+    },
+    {
+      "id": "sports",
+      "name": "Sports & Recreation",
+      "type": "product",
+      "description": "Sports equipment and recreational items",
+      "icon": "futbol-o",
+      "active": true
+    },
+    {
+      "id": "professional",
+      "name": "Professional Services",
+      "type": "service",
+      "description": "Business and professional services",
+      "icon": "briefcase",
+      "active": true
+    },
+    {
+      "id": "home-services",
+      "name": "Home Services",
+      "type": "service",
+      "description": "Home maintenance and improvement services",
+      "icon": "wrench",
+      "active": true
+    },
+    {
+      "id": "health",
+      "name": "Health & Wellness",
+      "type": "service",
+      "description": "Health, fitness, and wellness services",
+      "icon": "heart",
+      "active": true
+    },
+    {
+      "id": "education",
+      "name": "Education & Training",
+      "type": "service",
+      "description": "Educational services and training",
+      "icon": "graduation-cap",
+      "active": true
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "type": "service",
+      "description": "Entertainment and event services",
+      "icon": "music",
+      "active": true
+    }
+  ],
+  "metadata": {
+    "total_categories": 10,
+    "last_updated": "2024-01-01T00:00:00Z"
+  }
+}
