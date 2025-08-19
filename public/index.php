@@ -26,6 +26,14 @@ if (!headers_sent()) {
     }
 }
 
+// CSRF protection for POST requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        http_response_code(403);
+        die('CSRF token validation failed');
+    }
+}
+
 /**
  * Router class to handle URL routing
  */
@@ -118,6 +126,35 @@ class Router {
         // Remove query parameters
         if (strpos($path, '?') !== false) {
             $path = substr($path, 0, strpos($path, '?'));
+        }
+        
+        // Sanitize path to prevent directory traversal
+        $path = preg_replace('/[^a-zA-Z0-9\/\-_]/', '', $path);
+        
+        // Prevent access to sensitive paths
+        if (strpos($path, 'admin') === 0 && !$this->isUserAdmin()) {
+            $path = '403';
+        }
+        
+        // Additional security checks
+        $forbiddenPatterns = [
+            '/\.\./',           // Directory traversal
+            '/\/\//',           // Double slashes
+            '/\/\.\//',         // Hidden directories
+            '/\/\.\.\//',       // Parent directory access
+            '/\/etc\//',        // System directories
+            '/\/var\//',        // System directories
+            '/\/tmp\//',        // Temporary directories
+            '/\/proc\//',       // Process directories
+            '/\/sys\//',        // System directories
+            '/\/dev\//'         // Device directories
+        ];
+        
+        foreach ($forbiddenPatterns as $pattern) {
+            if (preg_match($pattern, $path)) {
+                $path = '403';
+                break;
+            }
         }
         
         return $path;
@@ -342,9 +379,22 @@ class Router {
         http_response_code($code);
         $pageTitle = $title . ' - ' . PLATFORM_NAME;
         
-        include __DIR__ . '/../src/templates/header.php';
-        include __DIR__ . '/../src/templates/error.php';
-        include __DIR__ . '/../src/templates/footer.php';
+        // Log error for security monitoring
+        if (LOG_ERRORS) {
+            error_log("Error $code: $title - $message - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        }
+        
+        try {
+            include __DIR__ . '/../src/templates/header.php';
+            include __DIR__ . '/../src/templates/error.php';
+            include __DIR__ . '/../src/templates/footer.php';
+        } catch (Exception $e) {
+            // Fallback error display if templates fail
+            echo "<h1>$title</h1><p>$message</p>";
+            if (DEVELOPMENT_MODE) {
+                echo "<p>Error: " . htmlspecialchars($e->getMessage()) . "</p>";
+            }
+        }
     }
 }
 

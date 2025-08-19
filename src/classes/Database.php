@@ -20,7 +20,14 @@ class Database {
         
         // Create data directory if it doesn't exist
         if (!is_dir($this->dataPath)) {
-            mkdir($this->dataPath, 0755, true);
+            if (!mkdir($this->dataPath, 0755, true)) {
+                throw new Exception("Failed to create data directory: {$this->dataPath}");
+            }
+        }
+        
+        // Verify directory is writable
+        if (!is_writable($this->dataPath)) {
+            throw new Exception("Data directory is not writable: {$this->dataPath}");
         }
     }
     
@@ -425,7 +432,12 @@ class Database {
      */
     private function validateFilePath($filePath) {
         // Check for directory traversal attempts
-        if (strpos($filePath, '..') !== false) {
+        if (strpos($filePath, '..') !== false || strpos($filePath, '//') !== false) {
+            return false;
+        }
+        
+        // Check for null bytes
+        if (strpos($filePath, "\0") !== false) {
             return false;
         }
         
@@ -435,6 +447,26 @@ class Database {
         
         if ($realFilePath === false || strpos($realFilePath, $realDataPath) !== 0) {
             return false;
+        }
+        
+        // Additional security checks
+        $forbiddenPatterns = [
+            '/\.\./',           // Directory traversal
+            '/\/\//',           // Double slashes
+            '/\/\.\//',         // Hidden directories
+            '/\/\.\.\//',       // Parent directory access
+            '/\/etc\//',        // System directories
+            '/\/var\//',        // System directories
+            '/\/tmp\//',        // Temporary directories
+            '/\/proc\//',       // Process directories
+            '/\/sys\//',        // System directories
+            '/\/dev\//'         // Device directories
+        ];
+        
+        foreach ($forbiddenPatterns as $pattern) {
+            if (preg_match($pattern, $filePath)) {
+                return false;
+            }
         }
         
         return true;
@@ -581,7 +613,16 @@ class Database {
      */
     private function logError($message) {
         if (LOG_ERRORS) {
-            error_log("[Database Error] $message");
+            $logData = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'level' => 'ERROR',
+                'component' => 'Database',
+                'message' => $message,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+                'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown'
+            ];
+            error_log('[Database Error] ' . json_encode($logData));
         }
     }
     
@@ -592,7 +633,16 @@ class Database {
      */
     private function logInfo($message) {
         if (LOG_ERRORS) {
-            error_log("[Database Info] $message");
+            $logData = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'level' => 'INFO',
+                'component' => 'Database',
+                'message' => $message,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+                'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown'
+            ];
+            error_log('[Database Info] ' . json_encode($logData));
         }
     }
 }

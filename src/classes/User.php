@@ -17,10 +17,15 @@ class User {
     private $data;
     
     public function __construct($username = null) {
-        $this->db = new Database();
-        
-        if ($username) {
-            $this->loadByUsername($username);
+        try {
+            $this->db = new Database();
+            
+            if ($username) {
+                $this->loadByUsername($username);
+            }
+        } catch (Exception $e) {
+            $this->logError("Failed to initialize User class: " . $e->getMessage());
+            throw $e;
         }
     }
     
@@ -81,6 +86,21 @@ class User {
      * @return bool Success status
      */
     public function loadByUsername($username) {
+        // Validate and sanitize username
+        if (empty($username) || !is_string($username)) {
+            return false;
+        }
+        
+        $username = trim($username);
+        if (strlen($username) < 3 || strlen($username) > 20) {
+            return false;
+        }
+        
+        // Validate username format
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+            return false;
+        }
+        
         $users = $this->db->getAll(USERS_FILE, 'users');
         
         foreach ($users as $user) {
@@ -123,6 +143,17 @@ class User {
      * @return bool Authentication success
      */
     public function authenticate($username) {
+        // Validate input
+        if (empty($username) || !is_string($username)) {
+            return false;
+        }
+        
+        // Check for brute force attempts
+        if ($this->isAccountLocked($username)) {
+            $this->logError("Account locked due to too many failed attempts: $username");
+            return false;
+        }
+        
         if ($this->loadByUsername($username)) {
             // Check if user is active
             if ($this->data['status'] !== 'active') {
@@ -130,11 +161,23 @@ class User {
                 return false;
             }
             
+            // Check if account is suspended
+            if (isset($this->data['status']) && $this->data['status'] === 'suspended') {
+                $this->logError("User account suspended: $username");
+                return false;
+            }
+            
             // Update last active timestamp
             $this->updateLastActive();
             
+            // Reset failed login attempts
+            $this->resetFailedLoginAttempts($username);
+            
             $this->logInfo("User authenticated successfully: $username");
             return true;
+        } else {
+            // Log failed attempt
+            $this->logFailedLoginAttempt($username);
         }
         
         return false;
@@ -504,6 +547,9 @@ class User {
             return false;
         }
         
+        // Sanitize username
+        $userData['username'] = trim($userData['username']);
+        
         // Validate username format
         if (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $userData['username'])) {
             $this->logError("Invalid username format: " . $userData['username']);
@@ -519,8 +565,18 @@ class User {
         
         // Validate email if provided
         if (isset($userData['email']) && !empty($userData['email'])) {
+            $userData['email'] = trim($userData['email']);
             if (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
                 $this->logError("Invalid email format: " . $userData['email']);
+                return false;
+            }
+        }
+        
+        // Validate phone if provided
+        if (isset($userData['phone']) && !empty($userData['phone'])) {
+            $userData['phone'] = trim($userData['phone']);
+            if (!preg_match('/^[\+]?[1-9][\d\s\-\(\)]{0,15}$/', $userData['phone'])) {
+                $this->logError("Invalid phone format: " . $userData['phone']);
                 return false;
             }
         }
@@ -618,7 +674,98 @@ class User {
      */
     private function logError($message) {
         if (LOG_ERRORS) {
-            error_log("[User Error] $message");
+            $logData = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'level' => 'ERROR',
+                'component' => 'User',
+                'message' => $message,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+                'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown'
+            ];
+            error_log('[User Error] ' . json_encode($logData));
+        }
+    }
+    
+    /**
+     * Check if account is locked due to too many failed attempts
+     * 
+     * @param string $username Username to check
+     * @return bool Whether account is locked
+     */
+    private function isAccountLocked($username) {
+        $failedAttemptsFile = ROOT_PATH . '/data/system/failed_logins.json';
+        
+        if (!file_exists($failedAttemptsFile)) {
+            return false;
+        }
+        
+        $failedAttempts = json_decode(file_get_contents($failedAttemptsFile), true) ?: [];
+        
+        if (isset($failedAttempts[$username])) {
+            $attempts = $failedAttempts[$username];
+            $lastAttempt = $attempts['last_attempt'] ?? 0;
+            $count = $attempts['count'] ?? 0;
+            
+            // Lock account for 15 minutes after 5 failed attempts
+            if ($count >= 5 && (time() - $lastAttempt) < 900) {
+                return true;
+            }
+            
+            // Reset count if more than 15 minutes have passed
+            if ((time() - $lastAttempt) >= 900) {
+                unset($failedAttempts[$username]);
+                file_put_contents($failedAttemptsFile, json_encode($failedAttempts));
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Log failed login attempt
+     * 
+     * @param string $username Username that failed
+     */
+    private function logFailedLoginAttempt($username) {
+        $failedAttemptsFile = ROOT_PATH . '/data/system/failed_logins.json';
+        
+        $failedAttempts = [];
+        if (file_exists($failedAttemptsFile)) {
+            $failedAttempts = json_decode(file_get_contents($failedAttemptsFile), true) ?: [];
+        }
+        
+        if (!isset($failedAttempts[$username])) {
+            $failedAttempts[$username] = [
+                'count' => 0,
+                'last_attempt' => 0
+            ];
+        }
+        
+        $failedAttempts[$username]['count']++;
+        $failedAttempts[$username]['last_attempt'] = time();
+        
+        file_put_contents($failedAttemptsFile, json_encode($failedAttempts));
+        
+        // Log security event
+        $this->logError("Failed login attempt for username: $username - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    }
+    
+    /**
+     * Reset failed login attempts for successful login
+     * 
+     * @param string $username Username that succeeded
+     */
+    private function resetFailedLoginAttempts($username) {
+        $failedAttemptsFile = ROOT_PATH . '/data/system/failed_logins.json';
+        
+        if (file_exists($failedAttemptsFile)) {
+            $failedAttempts = json_decode(file_get_contents($failedAttemptsFile), true) ?: [];
+            
+            if (isset($failedAttempts[$username])) {
+                unset($failedAttempts[$username]);
+                file_put_contents($failedAttemptsFile, json_encode($failedAttempts));
+            }
         }
     }
     
@@ -629,7 +776,16 @@ class User {
      */
     private function logInfo($message) {
         if (LOG_ERRORS) {
-            error_log("[User Info] $message");
+            $logData = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'level' => 'INFO',
+                'component' => 'User',
+                'message' => $message,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+                'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown'
+            ];
+            error_log('[User Info] ' . json_encode($logData));
         }
     }
     

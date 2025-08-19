@@ -121,14 +121,14 @@ define('CACHE_TTL_SHORT', 300);
 define('CACHE_TTL_LONG', 86400);
 
 // Error Reporting
-define('ERROR_REPORTING_LEVEL', E_ALL);
-define('DISPLAY_ERRORS', true);
+define('ERROR_REPORTING_LEVEL', E_ALL & ~E_DEPRECATED & ~E_STRICT);
+define('DISPLAY_ERRORS', false);
 define('LOG_ERRORS', true);
 define('ERROR_LOG_FILE', ROOT_PATH . '/logs/error.log');
 
 // Development Mode
-define('DEVELOPMENT_MODE', true);
-define('DEBUG_MODE', true);
+define('DEVELOPMENT_MODE', false);
+define('DEBUG_MODE', false);
 
 // API Settings
 define('API_VERSION', 'v1');

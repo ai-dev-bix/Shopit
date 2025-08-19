@@ -41,12 +41,66 @@ mb_http_output('UTF-8');
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
     session_start();
+    
+    // Regenerate session ID periodically for security
+    if (!isset($_SESSION['last_regeneration'])) {
+        $_SESSION['last_regeneration'] = time();
+    } elseif (time() - $_SESSION['last_regeneration'] > 300) { // 5 minutes
+        session_regenerate_id(true);
+        $_SESSION['last_regeneration'] = time();
+    }
+    
+    // Validate session integrity
+    if (isset($_SESSION['user_id']) && !isset($_SESSION['user_agent'])) {
+        $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    }
+    
+    if (isset($_SESSION['user_id']) && isset($_SESSION['user_agent'])) {
+        if ($_SESSION['user_agent'] !== ($_SERVER['HTTP_USER_AGENT'] ?? '')) {
+            // Potential session hijacking - destroy session
+            session_destroy();
+            header('Location: /login');
+            exit;
+        }
+    }
 }
 
 // Set security headers
 if (!headers_sent()) {
     foreach (SECURITY_HEADERS as $header => $value) {
         header("$header: $value");
+    }
+}
+
+// Basic rate limiting
+$clientIP = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$rateLimitFile = ROOT_PATH . '/data/system/rate_limit.json';
+
+if (file_exists($rateLimitFile)) {
+    $rateLimitData = json_decode(file_get_contents($rateLimitFile), true) ?: [];
+    
+    if (isset($rateLimitData[$clientIP])) {
+        $lastRequest = $rateLimitData[$clientIP]['last_request'] ?? 0;
+        $requestCount = $rateLimitData[$clientIP]['count'] ?? 0;
+        
+        if (time() - $lastRequest < 60) { // 1 minute window
+            if ($requestCount > 100) { // Max 100 requests per minute
+                http_response_code(429);
+                die('Too many requests. Please try again later.');
+            }
+            $rateLimitData[$clientIP]['count'] = $requestCount + 1;
+        } else {
+            $rateLimitData[$clientIP]['count'] = 1;
+        }
+        
+        $rateLimitData[$clientIP]['last_request'] = time();
+        file_put_contents($rateLimitFile, json_encode($rateLimitData));
+    } else {
+        $rateLimitData[$clientIP] = [
+            'last_request' => time(),
+            'count' => 1
+        ];
+        file_put_contents($rateLimitFile, json_encode($rateLimitData));
     }
 }
 
@@ -59,6 +113,10 @@ if (DEVELOPMENT_MODE) {
     if (!headers_sent()) {
         header('X-Development-Mode: true');
     }
+} else {
+    // Production mode - ensure errors are hidden
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
 }
 
 // Production mode settings
@@ -299,6 +357,12 @@ $config_errors = validateConfig();
 if (!empty($config_errors)) {
     if (DEVELOPMENT_MODE) {
         error_log('Configuration errors: ' . implode(', ', $config_errors));
+    } else {
+        // In production, log errors but don't expose them
+        error_log('Configuration validation failed: ' . count($config_errors) . ' errors found');
+        foreach ($config_errors as $error) {
+            error_log('Config error: ' . $error);
+        }
     }
 }
 
@@ -306,3 +370,52 @@ if (!empty($config_errors)) {
 if (LOG_ERRORS) {
     error_log('Configuration loaded successfully at ' . date(DATETIME_FORMAT));
 }
+
+// Set up error handler for uncaught exceptions
+set_error_handler(function($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        return;
+    }
+    
+    $error = [
+        'severity' => $severity,
+        'message' => $message,
+        'file' => $file,
+        'line' => $line,
+        'timestamp' => date(DATETIME_FORMAT),
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+    ];
+    
+    error_log('PHP Error: ' . json_encode($error));
+    
+    if (DEVELOPMENT_MODE) {
+        throw new ErrorException($message, 0, $severity, $file, $line);
+    }
+});
+
+// Set up exception handler
+set_exception_handler(function($exception) {
+    $error = [
+        'message' => $exception->getMessage(),
+        'file' => $exception->getFile(),
+        'line' => $exception->getLine(),
+        'trace' => $exception->getTraceAsString(),
+        'timestamp' => date(DATETIME_FORMAT),
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+    ];
+    
+    error_log('Uncaught Exception: ' . json_encode($error));
+    
+    if (DEVELOPMENT_MODE) {
+        echo '<h1>Uncaught Exception</h1>';
+        echo '<p>' . htmlspecialchars($exception->getMessage()) . '</p>';
+        echo '<p>File: ' . htmlspecialchars($exception->getFile()) . ':' . $exception->getLine() . '</p>';
+        echo '<pre>' . htmlspecialchars($exception->getTraceAsString()) . '</pre>';
+    } else {
+        http_response_code(500);
+        echo '<h1>Internal Server Error</h1>';
+        echo '<p>An unexpected error occurred. Please try again later.</p>';
+    }
+    
+    exit(1);
+});
