@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "id": "admin1",
+      "username": "admin1",
+      "type": "admin",
+      "email": "admin1@platform.com",
+      "phone": "",
+      "location": {
+        "lat": 0,
+        "lng": 0,
+        "address": ""
+      },
+      "rating": 0,
+      "total_ratings": 0,
+      "created_at": "2024-01-01T00:00:00Z",
+      "last_active": "2024-01-01T00:00:00Z",
+      "status": "active"
+    },
+    {
+      "id": "admin2",
+      "username": "admin2",
+      "type": "admin",
+      "email": "admin2@platform.com",
+      "phone": "",
+      "location": {
+        "lat": 0,
+        "lng": 0,
+        "address": ""
+      },
+      "rating": 0,
+      "total_ratings": 0,
+      "created_at": "2024-01-01T00:00:00Z",
+      "last_active": "2024-01-01T00:00:00Z",
+      "status": "active"
+    }
+  ],
+  "metadata": {
+    "total_users": 2,
+    "last_updated": "2024-01-01T00:00:00Z",
+    "next_user_id": 1
+  }
+}
