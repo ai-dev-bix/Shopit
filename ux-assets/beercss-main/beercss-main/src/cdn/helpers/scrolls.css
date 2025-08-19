@@ -1,0 +1,9 @@
+.scroll {
+  overflow: auto;
+  max-inline-size: calc(100vw - calc(var(--_padding, 0) * 2));
+  margin: auto;
+}
+
+.no-scroll {
+  overflow: hidden;
+}

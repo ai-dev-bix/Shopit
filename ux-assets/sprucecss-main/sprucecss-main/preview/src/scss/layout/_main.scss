@@ -1,0 +1,21 @@
+@use 'spruce' as *;
+
+.l-main {
+  padding-block: spacer-clamp('l', 'xl');
+
+  &__inner {
+    @include layout-sidebar('l:xl', 12rem);
+  }
+
+  &__sidebar {
+    &-inner {
+      inset-block-start: spacer('m');
+      position: sticky;
+      @include layout-stack('m');
+    }
+  }
+
+  &__body {
+    @include layout-stack('s');
+  }
+}
