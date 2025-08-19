@@ -43,7 +43,7 @@ o	Financial Health: Positive unit economics by month 12.
 ·	Seller verification (ID, documents).
 ·	User roles: Customer, Supplier, Admin.
 4.2 Listings Management (Supplier)
-·	Upload up to 10 images (min 1, quality checks).
+·	Upload up to 10 images (min 1, quality checks). Or capture directly using the device builtin camera.
 ·	Add title, description (500-char limit).
 ·	Pricing options: per unit / hour / day / project.
 ·	Set stock (optional), toggle “show stock left.”
