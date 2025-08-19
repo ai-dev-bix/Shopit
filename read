@@ -1,1 +1,171 @@
-till later
+First, brainstorming
+
+We are planning to develop an application where a user can capture images for a product or service, add name, description, number of units (if applicable for this service or product, and if it is activated the client can show the number of units left) and cost per unit, hour, day, other., he can also add tags to that. There is also a button that detect the user's location (he can manually change the Lat and long if he needs to as well, then he posts that. Another option there is opening the ability to book a time to get the service (the customer can book a time from available slots). The supplier can decide if the product purchase requires sales approval or not. If it does, the sales will be formal once the supplier approves the customer request to buy. If sales approval is not requires then the sales takes place once the customer buys it. The payment is made on purchase date. It is locked in the system account till the delivery time due. If both the buyer and the seller confirms the sales as complete, the money moves to the seller account. If not, and any of the two parties requests moving the money to his account, the other has to approve it, and if that doesn't happen, the one blocking the completion of the transfer can start a dispute in 72 hours and each side present his case for the system admins to judge on the transfer. If the one blocking the transfer does not present his case Another user browsing the products and services in the system, can filter how close the distance he wants to filter accordingly (the radius), price min and max, multi tags... Then if he finds what he wants, he can go thru the purchase operation.
+
+Second, a primary PRD draft:
+
+1. Executive Summary
+A location-based marketplace platform that enables users to buy and sell products or services nearby, with secure escrow payments, optional booking features, and built-in dispute resolution. The platform emphasizes trust, transparency, and convenience, while supporting sellers with tools to manage inventory, availability, and payments.
+2. Goals & Success Metrics
+·	Goals:
+o	Build a trusted platform for local commerce.
+o	Provide secure transactions via escrow.
+o	Support both products (units) and services (bookings).
+o	Minimize disputes with structured approval & resolution flows.
+o	Scale revenue through commissions, subscriptions, and premium features.
+·	Success Criteria:
+o	User Adoption: 1,000+ active users within 6 months.
+o	Transaction Success Rate: >95% completed without disputes.
+o	User Satisfaction: Avg. rating >4.0/5.0.
+o	Financial Health: Positive unit economics by month 12.
+3. User Roles
+3.1 Supplier (Seller/Service Provider)
+·	Create/manage listings.
+·	Define availability & pricing.
+·	Approve/reject purchase requests (if enabled).
+·	Confirm delivery/service completion.
+·	Access financial reports.
+3.2 Customer (Buyer)
+·	Register & maintain profile.
+·	Browse, search, and filter listings.
+·	Purchase or book services.
+·	Rate/review completed transactions.
+·	Track order history.
+3.3 System Administrator
+·	Manage users & roles.
+·	Oversee disputes.
+·	Monitor transactions.
+·	Enforce compliance policies.
+4. Core Features
+4.1 User Management & Authentication
+·	Registration/login (email, phone, OAuth).
+·	Profile management with ratings & reviews.
+·	Seller verification (ID, documents).
+·	User roles: Customer, Supplier, Admin.
+4.2 Listings Management (Supplier)
+·	Upload up to 10 images (min 1, quality checks).
+·	Add title, description (500-char limit).
+·	Pricing options: per unit / hour / day / project.
+·	Set stock (optional), toggle “show stock left.”
+·	Add tags (max 10).
+·	Assign category (predefined taxonomy).
+·	Location: auto-detect GPS + manual override.
+·	Availability calendar (for services, with recurring slots).
+·	Enable/disable sales approval toggle.
+·	Set listing status (active, paused, archived).
+4.3 Discovery & Search (Customer)
+·	Filters:
+o	Radius (1–50 km).
+o	Price min/max.
+o	Multi-tag selection.
+o	Category filtering.
+o	Availability filter.
+o	Rating filter.
+·	Search & Browse:
+o	Keyword search.
+o	Category browsing.
+o	Sorting: distance, price, rating, date posted.
+o	Map view with markers.
+·	User Experience Enhancements:
+o	Favorites / saved searches.
+o	Recently viewed items.
+4.4 Purchase & Booking Flow
+Standard Purchase (No Approval Required)
+1.	Customer selects item/service.
+2.	Enters quantity/time slot.
+3.	Reviews total cost.
+4.	Pays (funds held in escrow).
+5.	Seller notified → fulfills order.
+Approval-Required Purchase
+1.	Customer submits purchase request.
+2.	Seller approves/rejects.
+3.	If approved → Customer pays → Escrow.
+4.	Transaction proceeds to fulfillment.
+Booking System (Services)
+·	View available slots in calendar.
+·	Select date/time.
+·	Add notes/special requests.
+·	Receive confirmation + reminders.
+·	Support for recurring availability.
+4.5 Payments & Escrow
+·	Payment gateway integration (Stripe, PayPal, or similar).
+·	Multi-payment methods (credit, debit, wallets).
+·	Platform fee deducted per transaction.
+·	Escrow holding until completion.
+Release Logic:
+1.	Both confirm → funds released.
+2.	One requests release → other has 72h to approve/dispute.
+3.	No dispute → auto-release.
+4.	Dispute → Admin resolves.
+Additional:
+·	Refund policies (partial/full based on supplier settings).
+·	Multi-currency support (future phase).
+·	Tax calculation compliance (country-specific).
+4.6 Communication System
+·	In-app chat (buyer ↔ supplier).
+·	Order-specific threads (auditable for disputes).
+·	File upload (images/documents).
+·	Push + email notifications.
+4.7 Ratings & Reviews
+·	Buyers rate suppliers post-completion.
+·	Text review + star rating.
+·	Ratings aggregated to supplier profile.
+4.8 Admin Tools
+·	Dispute dashboard with evidence logs.
+·	Fraud detection & flagged activity alerts.
+·	User suspension/banning.
+·	Financial reporting & transaction logs.
+5. Technical & Security Requirements
+·	Mobile-first: iOS/Android native apps.
+·	Web portal for sellers/admins.
+·	Cloud storage for media.
+·	Data Security:
+o	PCI DSS compliance.
+o	Encrypted storage & transport.
+o	GDPR/data privacy compliance.
+·	Scalability: Microservices architecture with cloud deployment.
+·	Performance: Search <2s, Payment <3s processing.
+6. Business Model
+·	Revenue Streams:
+o	Transaction fees (2–5%).
+o	Featured listings.
+o	Premium seller subscriptions.
+o	Payment processing margins.
+·	Metrics to Track:
+o	GMV (Gross Merchandise Value).
+o	Active users.
+o	Conversion rates.
+o	Dispute frequency.
+o	Retention rates.
+7. Roadmap (Phased Implementation)
+Phase 1 (MVP)
+·	User registration/authentication.
+·	Basic listing creation & browsing.
+·	Simple filtering.
+·	Purchase flow + escrow.
+·	In-app messaging.
+Phase 2
+·	Full booking system.
+·	Advanced search & filters.
+·	Ratings & reviews.
+·	Mobile apps.
+·	Dispute evidence system.
+Phase 3
+·	Analytics dashboards for sellers.
+·	AI-driven recommendations.
+·	Multi-currency & tax support.
+·	Loyalty & referral programs.
+·	API for integrations.
+8. Risk Mitigation
+·	Fraud & scams → ID verification, reviews, escrow, admin monitoring.
+·	Payment disputes → Clear policy + automated escrow workflows.
+·	Low adoption → Incentives, referral bonuses, early adopter campaigns.
+·	Legal compliance → Ongoing legal reviews, prohibited items list, terms & privacy.
+·	Technical downtime → Redundant infrastructure, monitoring, SLAs.
+9. Final notes
+1.	Cancellation/refund policy: The seller decides the cancelation conditions (for example: 1)once purchased, cant cancel. Or 2) Cancelation allowed # of hours before delivery time or after purchase confirmed. or 3) cancelation allowed anytime before sales completion. And the client can see that condition in the product description - the system reacts to cancelation request accordingly).
+2.	Payment providers – Stripe/PayPal or other integrations via api
+4.	Commission model – fixed fee, % fee, or hybrid, the system admin sets the rates from the backend.
+5.	Booking: we need support for recurring services (weekly/monthly)
+
+
