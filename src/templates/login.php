@@ -28,16 +28,16 @@
                             </div>
                             
                             <div class="field">
-                                <label class="label" for="password">Password</label>
+                                <label class="label" for="password">Password (Optional)</label>
                                 <div class="control has-icons-left">
                                     <input class="input" type="password" id="password" name="password" 
-                                           placeholder="Enter your password" required>
+                                           placeholder="Enter your password (optional)">
                                     <span class="icon is-small is-left">
                                         <i class="fas fa-lock"></i>
                                     </span>
                                 </div>
                                 <p class="help">
-                                    <a href="/forgot-password">Forgot your password?</a>
+                                    <em>Note: This prototype uses username-only authentication. Password field is optional.</em>
                                 </p>
                             </div>
                             
@@ -106,10 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Basic validation
         const username = usernameInput.value.trim();
-        const password = passwordInput.value;
         
-        if (!username || !password) {
-            showNotification('Please enter both username and password.', 'warning');
+        if (!username) {
+            showNotification('Please enter your username.', 'warning');
             submitBtn.classList.remove('is-loading');
             return;
         }
@@ -139,11 +138,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = redirectUrl;
                 }, 1000);
             } else {
-                showNotification(data.message || 'Login failed. Please check your credentials.', 'danger');
+                showNotification(data.message || 'Login failed. Please check your username.', 'danger');
                 
-                // Clear password field on failed login
-                passwordInput.value = '';
-                passwordInput.focus();
+                // Clear username field on failed login
+                usernameInput.value = '';
+                usernameInput.focus();
             }
         })
         .catch(error => {
@@ -156,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Quick login for demo accounts
     window.quickLogin = function(username) {
         usernameInput.value = username;
-        passwordInput.value = 'demo123'; // Demo password
         
         // Auto-submit form
         form.dispatchEvent(new Event('submit'));
