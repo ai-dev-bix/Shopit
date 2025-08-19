@@ -1,0 +1,21 @@
+Act like a project manager and software engineer, heading a team packed with developers and expertise required for this task. Hire new experts per required to add to your team as the task require.
+
+In read file in the github repo, you will find brainstorming about the ultimate platform we are planning to build in the future, roughly.
+
+I need to create a simple prototype to show some of the main features from adding product or service, filtering product or service per location, tags, etc... buying a product or service, etc...  It has to be a simple prototype that I can develop using cursor ai solution. For example, use json files in /data subfolders instead of proper database. Have two admin accounts you add in code with usernames and passwords (or even just a username to get into the system), then any user can add himself as a new account by choosing a new unique username and from there he can either buy or sell.  create a PRD for this kind of web application prototypes that shows what is going to be developed without the complexities required to develop the actual product.
+
+ want easy deployment to a domain subdirectory using plesk ui. You can even go to an extend where you can use html pages, js files, PHP for communicating with the server (upload image, capture using a camera, save, etc...), and json files for data storage.  The developed code has to be all done within or calls libraries available without requesting me to do anything beyond upload the generates codebase to the server AS IT and testing it AS IT.
+
+
+
+
+
+Forensically learn it and understand what is required, create the lighter fake but telling exciting prototype PRD (save it as a document in a folcder in the repo called workspace which you will use as a library for your documentation, management and rules). Take all the time you need, this is a critical stage and no furthur work can be dine successfully if there was any flaws in the execution of this stage. You may need to systematically work on it so you create a proper pyramid-grape-nodes-like understanding where at the end you have a condensed overview of the whole development process that you keep in your context memory and document it in a file you create in workspace, but it has the mapping and logical connections required to take you deep to different parts of the codebase based on what is required, what you are changing in the code, and where such changes may impact or demand connected changes.
+
+Use the workspace/ folder as your working area. For example, add notes file (notes for yourself of things need to pay attention to at some point or get back to to do something, just so you dont forget it later), to-do lists, functional mapping file (where you map each of the platform features to the bits of the code relevant to it in what files and what code snippets in that file), bugs list (where you can see bugs require fixing), optimization file, enhancement file, suggested features file, platform flows document, and whatever tooling you need to have to help you accomplishing the work beyond your current limitations. 
+
+After you take all the time you need and all the thinking power you can have to reach the full understanding point, we can move to another task. But take your time to forensically get this first task done and I will be checking your work regularly. Make sure to push all the work you do into the repo.
+
+Impress me!
+
+I will push this prompt into the repo root as well (named: initial prompt) so you get back to to whenever needed, as a task reference and reminder.
